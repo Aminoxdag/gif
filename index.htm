@@ -94,7 +94,6 @@
                 <button id="url-btn" class="bg-neutral-800 hover:bg-neutral-700 px-6 rounded-2xl font-bold transition text-white">فتح</button>
             </div>
             
-            <!-- Progress bar for loading links -->
             <div id="initial-load-container" class="hidden w-full space-y-2">
                 <div class="flex justify-between text-[10px] font-bold uppercase tracking-widest text-neutral-600">
                     <span id="load-status-text">جاري الفحص...</span>
@@ -165,6 +164,7 @@
         </div>
     </div>
 
+    <!-- Video Element (Hidden) -->
     <video id="source-video" crossorigin="anonymous" playsinline style="display:none"></video>
 
     <script>
@@ -193,7 +193,9 @@
         let isGlobalPaused = false;
         let activePreviews = [];
         let pendingRange = { start: 0, end: 0 };
+        let currentVideoUrl = "";
 
+        // تجهيز الـ GIF Worker
         async function prepareWorker() {
             try {
                 const response = await fetch('https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js');
@@ -203,20 +205,19 @@
         }
         prepareWorker();
 
-        function getProxiedUrl(url) {
-            if (url.startsWith('blob:')) return url;
-            return `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-        }
-
+        // الضغط على زر "فتح رابط"
         urlBtn.onclick = () => {
             const rawUrl = videoUrl.value.trim();
             if (rawUrl) {
                 initialLoadContainer.classList.remove('hidden');
-                updateLoadProgress(30, "جاري الاتصال بالسيرفر...");
-                startApp(rawUrl, true);
+                updateLoadProgress(30, "جاري تهيئة الرابط...");
+                // إضافة الـ Fragment لضمان تحميل الميتا داتا فوراً
+                const directUrl = rawUrl.includes('#t=') ? rawUrl : rawUrl + '#t=0.1';
+                startApp(directUrl, true);
             }
         };
 
+        // اختيار ملف محلي
         videoInput.onchange = (e) => {
             const file = e.target.files[0];
             if (file) {
@@ -232,9 +233,12 @@
         }
 
         function startApp(src, isRemote) {
+            currentVideoUrl = src;
             sourceVideo.src = src;
+            sourceVideo.load(); // إجبار التحميل
+
             sourceVideo.onloadedmetadata = () => {
-                updateLoadProgress(100, "تم بنجاح!");
+                updateLoadProgress(100, "تم العثور على الفيديو!");
                 setTimeout(() => {
                     uploadScreen.classList.add('hidden');
                     feedScreen.classList.remove('hidden');
@@ -243,11 +247,13 @@
             };
 
             sourceVideo.onerror = () => {
+                // محاولة استخدام بروكسي AllOrigins إذا فشل التحميل المباشر
                 if (isRemote && !src.includes('allorigins')) {
                     updateLoadProgress(60, "تجاوز حماية السيرفر...");
-                    startApp(getProxiedUrl(videoUrl.value.trim()), true);
+                    const proxied = `https://api.allorigins.win/raw?url=${encodeURIComponent(src.split('#')[0])}`;
+                    startApp(proxied, true);
                 } else {
-                    alert("خطأ: تعذر تحميل الفيديو. السيرفر محمي بالكامل. يرجى رفعه يدوياً.");
+                    alert("خطأ: تعذر تحميل الفيديو. السيرفر محمي أو الرابط غير مباشر.");
                     initialLoadContainer.classList.add('hidden');
                 }
             };
@@ -257,6 +263,8 @@
             totalClips++;
             const id = `card-${totalClips}`;
             const duration = sourceVideo.duration;
+            if(!duration) return;
+
             const startTime = Math.random() * (duration - 4);
             const endTime = startTime + 3;
 
@@ -277,10 +285,12 @@
             const canvas = document.getElementById(`canvas-${id}`);
             const ctx = canvas.getContext('2d', { alpha: false });
             
+            // إنشاء فيديو منفصل لكل كارت لضمان سلاسة المعاينة
             const localVideo = document.createElement('video');
-            localVideo.src = sourceVideo.src;
+            localVideo.src = currentVideoUrl;
             localVideo.crossOrigin = "anonymous";
             localVideo.muted = true;
+            localVideo.playsInline = true;
             localVideo.currentTime = startTime;
 
             localVideo.onloadeddata = () => {
@@ -291,7 +301,9 @@
 
                 const playLoop = () => {
                     if (isGlobalPaused) { localVideo.pause(); return; }
-                    if (localVideo.currentTime >= endTime || localVideo.currentTime < startTime) localVideo.currentTime = startTime;
+                    if (localVideo.currentTime >= endTime || localVideo.currentTime < startTime) {
+                        localVideo.currentTime = startTime;
+                    }
                     ctx.drawImage(localVideo, 0, 0, canvas.width, canvas.height);
                     localVideo.play().catch(()=>{});
                     requestAnimationFrame(playLoop);
@@ -310,11 +322,13 @@
             isGlobalPaused = true;
             focusOverlay.classList.remove('hidden');
             document.body.style.overflow = 'hidden';
+            
             focusV = document.createElement('video');
-            focusV.src = sourceVideo.src;
+            focusV.src = currentVideoUrl;
             focusV.crossOrigin = "anonymous";
             focusV.muted = true;
             focusV.currentTime = start;
+            
             const fCtx = focusCanvas.getContext('2d');
             focusV.onloadeddata = () => {
                 focusCanvas.width = 1280;
@@ -337,6 +351,7 @@
             focusOverlay.classList.add('hidden');
             document.body.style.overflow = '';
             isGlobalPaused = false;
+            // إعادة تشغيل المعاينات في الخلفية
             activePreviews.forEach(p => p.loop());
         };
 
@@ -372,10 +387,18 @@
             let cur = pendingRange.start;
             while (cur <= pendingRange.end) {
                 sourceVideo.currentTime = cur;
-                await new Promise(r => sourceVideo.onseeked = r);
+                await new Promise(r => {
+                    const onSeeked = () => {
+                        sourceVideo.removeEventListener('seeked', onSeeked);
+                        r();
+                    };
+                    sourceVideo.addEventListener('seeked', onSeeked);
+                });
+                
                 tCtx.drawImage(sourceVideo, 0, 0, w, tCanvas.height);
                 gif.addFrame(tCtx, {copy: true, delay: 100});
                 cur += step;
+                
                 const p = Math.round(((cur - pendingRange.start) / (pendingRange.end - pendingRange.start)) * 100);
                 globalProgress.style.width = `${Math.min(99, p)}%`;
                 globalStatus.innerText = `جاري استخراج الإطارات... ${Math.min(99, p)}%`;
@@ -393,7 +416,10 @@
             gif.render();
         };
 
-        const observer = new IntersectionObserver(e => { if(e[0].isIntersecting) generateBatch(1); }, {threshold: 0.1});
+        const observer = new IntersectionObserver(e => { 
+            if(e[0].isIntersecting && !uploadScreen.classList.contains('hidden')) return;
+            if(e[0].isIntersecting) generateBatch(1); 
+        }, {threshold: 0.1});
         observer.observe(trigger);
     </script>
 </body>
