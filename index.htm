@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Infinity Gifs Pro - Cloud Edition</title>
+    <title>Infinity Gifs Pro - Custom Studio</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js"></script>
     <style>
@@ -35,8 +35,6 @@
             animation: shimmer 1.5s infinite linear;
         }
 
-        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-
         .loader-spin {
             border: 3px solid rgba(124, 58, 237, 0.1);
             border-top: 3px solid #7c3aed;
@@ -46,6 +44,24 @@
         }
 
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .control-chip {
+            cursor: pointer;
+            padding: 10px 16px;
+            border-radius: 12px;
+            background: #111;
+            border: 1px solid #222;
+            transition: all 0.2s;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .control-chip.active {
+            background: #7c3aed;
+            border-color: #a78bfa;
+            color: white;
+        }
     </style>
 </head>
 <body class="pb-10">
@@ -62,12 +78,13 @@
         </button>
     </header>
 
+    <!-- Upload Screen -->
     <div id="upload-screen" class="max-w-md mx-auto mt-20 px-8 text-center">
         <div class="w-24 h-24 bg-purple-600/10 rounded-[32px] mx-auto mb-8 flex items-center justify-center border-2 border-dashed border-purple-500/30">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
         </div>
-        <h2 class="text-3xl font-black mb-3">مستخرج الجفات السحابي</h2>
-        <p class="text-neutral-500 mb-10 text-sm leading-relaxed">متوافق تماماً مع الاستضافات الخارجية والروابط المباشرة.</p>
+        <h2 class="text-3xl font-black mb-3 text-white">استوديو الجفات المخصص</h2>
+        <p class="text-neutral-500 mb-10 text-sm">تحكم كامل في الحجم والجودة والنعومة.</p>
         
         <label class="block w-full bg-white text-black font-black py-5 rounded-[24px] cursor-pointer mb-4 hover:bg-neutral-200 transition">
             اختر فيديو من الجهاز
@@ -85,268 +102,268 @@
             </div>
             
             <div id="initial-load-container" class="hidden w-full space-y-2">
-                <div class="flex justify-between text-[10px] font-bold uppercase tracking-widest text-neutral-600">
-                    <span id="load-status-text">جاري الاتصال...</span>
+                <div class="flex justify-between text-[10px] font-bold uppercase text-neutral-600">
+                    <span id="load-status-text">جاري فحص التوافق...</span>
                     <span id="load-percentage">0%</span>
                 </div>
                 <div class="w-full h-1.5 bg-neutral-900 rounded-full overflow-hidden">
-                    <div id="initial-load-bar" class="h-full btn-gradient transition-all duration-300" style="width: 0%"></div>
+                    <div id="initial-load-bar" class="h-full btn-gradient transition-all" style="width: 0%"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="feed-screen" class="hidden px-4 max-w-xl mx-auto mt-6 space-y-8">
-        <div id="gif-grid" class="space-y-8"></div>
+    <!-- Main Grid -->
+    <div id="feed-screen" class="hidden px-4 max-w-2xl mx-auto mt-6 space-y-8">
+        <div id="gif-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
         <div id="load-more-trigger" class="py-20 flex justify-center">
             <div class="loader-spin"></div>
         </div>
     </div>
 
-    <!-- Focus Overlay & Quality Modal (Same as before) -->
-    <div id="focus-overlay" class="fixed inset-0 bg-black/95 backdrop-blur-2xl z-[1000] hidden flex flex-col items-center justify-center p-6">
-        <button id="close-focus" class="absolute top-8 right-8 p-3 bg-white/10 rounded-full text-white hover:bg-white/20 transition">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-        </button>
-        <div class="w-full max-w-3xl bg-[#050505] rounded-[40px] overflow-hidden border border-white/5 shadow-2xl">
-            <canvas id="focus-canvas" class="w-full aspect-video block object-contain bg-black"></canvas>
-            <div class="p-8 text-right">
-                <div class="flex justify-between items-center mb-6">
-                    <div>
-                        <h3 class="text-2xl font-black mb-1">معاينة اللقطة</h3>
-                        <p id="focus-meta" class="text-purple-400 font-bold text-xs uppercase">SHOT TIMESTAMP: --</p>
+    <!-- Advanced Settings Modal -->
+    <div id="quality-modal" class="fixed inset-0 z-[2000] bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 hidden">
+        <div class="w-full max-w-md bg-[#0a0a0a] border border-white/10 rounded-[40px] p-8 shadow-2xl">
+            <h4 class="text-2xl font-black mb-6 text-center">إعدادات التصدير</h4>
+            
+            <div class="space-y-8">
+                <!-- Size Control -->
+                <div>
+                    <label class="text-xs font-black text-neutral-500 uppercase mb-3 block tracking-widest">أبعاد الصورة (الحجم)</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="control-chip" data-type="size" data-val="320">320p</div>
+                        <div class="control-chip active" data-type="size" data-val="640">640p</div>
+                        <div class="control-chip" data-type="size" data-val="1080">1080p</div>
                     </div>
                 </div>
-                <button id="download-focus-btn" class="w-full btn-gradient py-5 rounded-[20px] font-black text-white flex items-center justify-center gap-3">
-                    تصدير وتحميل GIF
-                </button>
+
+                <!-- Quality Control -->
+                <div>
+                    <label class="text-xs font-black text-neutral-500 uppercase mb-3 block tracking-widest">مستوى الجودة والنعومة</label>
+                    <div class="space-y-2">
+                        <div class="control-chip flex justify-between items-center" data-type="quality" data-val="low">
+                            <span>اقتصادي</span><span class="text-[10px] opacity-50">10 FPS</span>
+                        </div>
+                        <div class="control-chip active flex justify-between items-center" data-type="quality" data-val="med">
+                            <span>متوازن</span><span class="text-[10px] opacity-50">18 FPS</span>
+                        </div>
+                        <div class="control-chip flex justify-between items-center border-purple-500/30 text-purple-400" data-type="quality" data-val="high">
+                            <span>فائق النعومة (Ultra)</span><span class="text-[10px] opacity-50">30 FPS</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button id="final-download-btn" class="w-full btn-gradient mt-10 py-5 rounded-[22px] font-black text-white shadow-xl shadow-purple-500/20 active:scale-95 transition">
+                بدء استخراج الملف
+            </button>
+            <button onclick="closeQualityModal()" class="w-full mt-4 text-neutral-600 text-sm font-bold">إلغاء</button>
+        </div>
+    </div>
+
+    <!-- Focus Preview -->
+    <div id="focus-overlay" class="fixed inset-0 bg-black/98 z-[1000] hidden flex flex-col items-center justify-center p-6">
+        <button id="close-focus" class="absolute top-8 right-8 p-3 bg-white/10 rounded-full text-white hover:bg-white/20">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+        <div class="w-full max-w-4xl bg-black rounded-[40px] overflow-hidden border border-white/5">
+            <canvas id="focus-canvas" class="w-full aspect-video block object-contain"></canvas>
+            <div class="p-8 text-right flex justify-between items-center">
+                <div>
+                    <h3 class="text-2xl font-black">معاينة اللقطة</h3>
+                    <p class="text-neutral-500 text-sm">حدد خيارات الجودة قبل التحميل</p>
+                </div>
+                <button id="open-settings-btn" class="btn-gradient px-10 py-4 rounded-2xl font-black text-white">تخصيص وتحميل</button>
             </div>
         </div>
     </div>
 
-    <div id="quality-modal" class="fixed inset-0 z-[2000] bg-black/80 flex items-center justify-center p-6 hidden">
-        <div class="w-full max-w-sm p-8 text-center bg-[#0a0a0a] rounded-[40px] border border-white/5">
-            <h4 class="text-2xl font-black mb-1">دقة التصدير</h4>
-            <div class="space-y-3 my-8">
-                <button onclick="confirmDownload('low')" class="w-full py-4 bg-neutral-900 rounded-2xl font-bold flex justify-between px-6 items-center">
-                    <span>منخفضة</span><span class="text-neutral-600">360p</span>
-                </button>
-                <button onclick="confirmDownload('excellent')" class="w-full py-5 bg-purple-600/10 border border-purple-500/30 rounded-2xl font-black flex justify-between px-6 items-center text-purple-400">
-                    <span>جودة كريستال</span><span class="bg-purple-600 text-white px-2 rounded text-[8px]">1080P</span>
-                </button>
-            </div>
-            <button onclick="closeQualityModal()" class="text-neutral-600 text-sm font-bold">إلغاء</button>
-        </div>
-    </div>
-
+    <!-- Processing Overlay -->
     <div id="global-processing" class="fixed inset-0 z-[3000] bg-black/95 flex flex-col items-center justify-center hidden p-10 text-center">
         <div class="loader-spin w-20 h-20 mb-8 border-t-purple-500"></div>
-        <p id="global-status" class="text-2xl font-black text-white mb-2">جاري الرندر الرقمي...</p>
-        <div class="w-64 h-1.5 bg-neutral-900 rounded-full mt-6 overflow-hidden">
-            <div id="global-progress" class="h-full btn-gradient" style="width: 0%"></div>
+        <p class="text-2xl font-black text-white mb-2">جاري المعالجة الرقمية...</p>
+        <p id="render-status" class="text-neutral-500 text-sm mb-6 font-mono tracking-tighter">FRAME: 0</p>
+        <div class="w-64 h-1.5 bg-neutral-900 rounded-full overflow-hidden">
+            <div id="global-progress" class="h-full btn-gradient transition-all" style="width: 0%"></div>
         </div>
     </div>
 
     <video id="source-video" crossorigin="anonymous" playsinline style="display:none"></video>
 
     <script>
-        const videoUrl = document.getElementById('video-url');
-        const urlBtn = document.getElementById('url-btn');
-        const initialLoadContainer = document.getElementById('initial-load-container');
-        const initialLoadBar = document.getElementById('initial-load-bar');
-        const loadStatusText = document.getElementById('load-status-text');
         const sourceVideo = document.getElementById('source-video');
-        const uploadScreen = document.getElementById('upload-screen');
-        const feedScreen = document.getElementById('feed-screen');
-        const gifGrid = document.getElementById('gif-grid');
-        
         let workerBlobUrl = null;
-        let isGlobalPaused = false;
-        let currentVideoUrl = "";
-        let activePreviews = [];
+        let isPaused = false;
+        let currentUrl = "";
+        let selection = { size: 640, quality: 'med' };
 
-        // تحسين تحميل الـ Worker ليعمل على GitHub Pages
-        async function initWorker() {
+        // Initialize Workers for GitHub Pages compatibility
+        async function init() {
             try {
-                const response = await fetch('https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js');
-                const blob = await response.blob();
-                workerBlobUrl = URL.createObjectURL(blob);
-            } catch (e) { console.error("Worker Error", e); }
+                const resp = await fetch('https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js');
+                workerBlobUrl = URL.createObjectURL(await resp.blob());
+            } catch(e) {}
         }
-        initWorker();
+        init();
 
-        function updateLoadProgress(p, status) {
-            initialLoadBar.style.width = `${p}%`;
-            document.getElementById('load-percentage').innerText = `${p}%`;
-            loadStatusText.innerText = status;
-        }
+        // Control Logic
+        document.querySelectorAll('.control-chip').forEach(chip => {
+            chip.onclick = () => {
+                const type = chip.dataset.type;
+                document.querySelectorAll(`.control-chip[data-type="${type}"]`).forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                selection[type] = chip.dataset.val;
+            };
+        });
 
-        urlBtn.onclick = async () => {
-            const url = videoUrl.value.trim();
-            if (!url) return;
+        // App Start
+        document.getElementById('url-btn').onclick = async () => {
+            const url = document.getElementById('video-url').value;
+            if(!url) return;
+            document.getElementById('initial-load-container').classList.remove('hidden');
             
-            initialLoadContainer.classList.remove('hidden');
-            updateLoadProgress(30, "جاري فحص الرابط...");
+            // Smart Bypass for GitHub Pages
+            const proxied = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+            const testV = document.createElement('video');
+            testV.crossOrigin = "anonymous";
+            testV.src = url;
             
-            // محرك الاستخراج الذكي (نسخة الـ Cloud)
-            try {
-                const testVideo = document.createElement('video');
-                testVideo.crossOrigin = "anonymous";
-                testVideo.src = url;
-                
-                // محاولة التحميل المباشر أولاً
-                testVideo.onloadedmetadata = () => startApp(url);
-                
-                testVideo.onerror = () => {
-                    updateLoadProgress(60, "تجاوز قيود السيرفر...");
-                    // استخدام AllOrigins للالتفاف على CORS
-                    const proxied = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-                    startApp(proxied);
-                };
-            } catch (e) {
-                alert("تعذر الوصول للرابط");
-            }
+            testV.onloadedmetadata = () => loadVideo(url);
+            testV.onerror = () => loadVideo(proxied);
         };
 
         document.getElementById('video-input').onchange = (e) => {
-            const file = e.target.files[0];
-            if (file) startApp(URL.createObjectURL(file));
+            if(e.target.files[0]) loadVideo(URL.createObjectURL(e.target.files[0]));
         };
 
-        function startApp(src) {
-            currentVideoUrl = src;
+        function loadVideo(src) {
+            currentUrl = src;
             sourceVideo.src = src;
-            sourceVideo.crossOrigin = "anonymous";
             sourceVideo.load();
-
             sourceVideo.onloadedmetadata = () => {
-                updateLoadProgress(100, "جاهز!");
-                setTimeout(() => {
-                    uploadScreen.classList.add('hidden');
-                    feedScreen.classList.remove('hidden');
-                    generateBatch(3);
-                }, 500);
+                document.getElementById('upload-screen').classList.add('hidden');
+                document.getElementById('feed-screen').classList.remove('hidden');
+                generate(4);
             };
         }
 
-        async function createGifCard() {
-            const duration = sourceVideo.duration;
-            if (!duration) return;
-            
-            const start = Math.random() * (duration - 4);
-            const end = start + 3;
-            const id = `c-${Date.now()}-${Math.random()}`;
+        async function generate(n) {
+            for(let i=0; i<n; i++) {
+                const start = Math.random() * (sourceVideo.duration - 4);
+                const end = start + 3;
+                const card = document.createElement('div');
+                card.className = 'gif-card shimmer aspect-video relative group cursor-pointer';
+                card.onclick = () => openFocus(start, end);
+                document.getElementById('gif-grid').appendChild(card);
 
-            const card = document.createElement('div');
-            card.className = 'gif-card group relative aspect-video bg-[#050505] shimmer';
-            card.innerHTML = `<canvas id="${id}" class="w-full h-full block object-contain opacity-0 transition-opacity"></canvas>`;
-            card.onclick = () => openFocusMode(start, end);
-            gifGrid.appendChild(card);
+                const canvas = document.createElement('canvas');
+                canvas.className = 'w-full h-full object-contain opacity-0 transition-opacity duration-700';
+                card.appendChild(canvas);
 
-            const canvas = document.getElementById(id);
-            const ctx = canvas.getContext('2d', {alpha: false});
-            const v = document.createElement('video');
-            v.src = currentVideoUrl;
-            v.crossOrigin = "anonymous";
-            v.muted = true;
-            v.currentTime = start;
-            
-            v.onloadeddata = () => {
-                canvas.width = 480;
-                canvas.height = 480 / (v.videoWidth / v.videoHeight);
-                canvas.classList.remove('opacity-0');
-                card.classList.remove('shimmer');
-
-                const loop = () => {
-                    if (isGlobalPaused) return;
-                    if (v.currentTime >= end || v.currentTime < start) v.currentTime = start;
-                    ctx.drawImage(v, 0, 0, canvas.width, canvas.height);
-                    v.play().catch(()=>{});
-                    requestAnimationFrame(loop);
+                const v = document.createElement('video');
+                v.src = currentUrl;
+                v.crossOrigin = "anonymous";
+                v.muted = true;
+                v.currentTime = start;
+                
+                v.onloadeddata = () => {
+                    canvas.width = 480;
+                    canvas.height = 480 / (v.videoWidth/v.videoHeight);
+                    canvas.classList.remove('opacity-0');
+                    card.classList.remove('shimmer');
+                    const ctx = canvas.getContext('2d');
+                    const loop = () => {
+                        if(isPaused) return;
+                        if(v.currentTime >= end) v.currentTime = start;
+                        ctx.drawImage(v, 0, 0, canvas.width, canvas.height);
+                        v.play().catch(()=>{});
+                        requestAnimationFrame(loop);
+                    };
+                    loop();
                 };
-                activePreviews.push({v, loop});
-                loop();
-            };
+            }
         }
 
-        function generateBatch(n) { for(let i=0; i<n; i++) createGifCard(); }
-
-        // باقي وظائف الـ Focus والتصدير (متطابقة ومصلحة)
-        window.openFocusMode = (s, e) => {
-            isGlobalPaused = true;
+        function openFocus(s, e) {
+            isPaused = true;
             document.getElementById('focus-overlay').classList.remove('hidden');
             const fv = document.createElement('video');
-            fv.src = currentVideoUrl;
-            fv.crossOrigin = "anonymous";
-            fv.muted = true;
-            fv.currentTime = s;
+            fv.src = currentUrl; fv.crossOrigin="anonymous"; fv.muted=true; fv.currentTime=s;
             const fc = document.getElementById('focus-canvas');
             const fctx = fc.getContext('2d');
-            
             fv.onloadeddata = () => {
-                fc.width = 1280;
-                fc.height = 1280 / (fv.videoWidth / fv.videoHeight);
+                fc.width = 1280; fc.height = 1280/(fv.videoWidth/fv.videoHeight);
                 const floop = () => {
-                    if (!isGlobalPaused) return;
-                    if (fv.currentTime >= e || fv.currentTime < s) fv.currentTime = s;
+                    if(!isPaused) return;
+                    if(fv.currentTime >= e) fv.currentTime = s;
                     fctx.drawImage(fv, 0, 0, fc.width, fc.height);
                     fv.play().catch(()=>{});
                     requestAnimationFrame(floop);
                 };
                 floop();
             };
-            window._currentFocusV = fv;
-            document.getElementById('download-focus-btn').onclick = () => {
-                window._pending = {s, e};
+            window._pending = {s, e};
+            document.getElementById('open-settings-btn').onclick = () => {
                 document.getElementById('quality-modal').classList.remove('hidden');
             };
-        };
+        }
 
-        document.getElementById('close-focus').onclick = () => {
-            isGlobalPaused = false;
-            if(window._currentFocusV) window._currentFocusV.pause();
-            document.getElementById('focus-overlay').classList.add('hidden');
-            activePreviews.forEach(p => p.loop());
-        };
-
-        window.confirmDownload = async (qKey) => {
+        document.getElementById('final-download-btn').onclick = async () => {
             document.getElementById('quality-modal').classList.add('hidden');
             document.getElementById('global-processing').classList.remove('hidden');
             
             const {s, e} = window._pending;
-            const w = qKey === 'low' ? 360 : 720;
+            const width = parseInt(selection.size);
+            
+            // FPS logic
+            let step = 0.1; // Med 10fps
+            let quality = 10;
+            if(selection.quality === 'low') { step = 0.15; quality = 20; }
+            if(selection.quality === 'high') { step = 0.033; quality = 2; } // 30fps
+
             const gif = new GIF({
-                workers: 2, quality: 10, width: w,
-                height: w / (sourceVideo.videoWidth/sourceVideo.videoHeight),
+                workers: 4, quality: quality, width: width,
+                height: width / (sourceVideo.videoWidth/sourceVideo.videoHeight),
                 workerScript: workerBlobUrl
             });
 
             const tempC = document.createElement('canvas');
-            tempC.width = w; tempC.height = w / (sourceVideo.videoWidth/sourceVideo.videoHeight);
+            tempC.width = width; 
+            tempC.height = width / (sourceVideo.videoWidth/sourceVideo.videoHeight);
             const tctx = tempC.getContext('2d');
 
             let cur = s;
+            let count = 0;
             while(cur <= e) {
                 sourceVideo.currentTime = cur;
                 await new Promise(r => sourceVideo.onseeked = r);
-                tctx.drawImage(sourceVideo, 0, 0, w, tempC.height);
-                gif.addFrame(tctx, {copy: true, delay: 100});
-                cur += 0.1;
+                tctx.drawImage(sourceVideo, 0, 0, width, tempC.height);
+                gif.addFrame(tctx, {copy: true, delay: step * 1000});
+                cur += step;
+                count++;
+                document.getElementById('render-status').innerText = `FRAME: ${count}`;
                 document.getElementById('global-progress').style.width = `${((cur-s)/(e-s))*100}%`;
             }
 
             gif.on('finished', blob => {
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
-                a.download = `infinity-${Date.now()}.gif`;
+                a.download = `Infinity-${selection.size}p-${selection.quality}.gif`;
                 a.click();
                 document.getElementById('global-processing').classList.add('hidden');
             });
             gif.render();
         };
 
-        const observer = new IntersectionObserver(ent => { if(ent[0].isIntersecting) generateBatch(1); });
-        observer.observe(document.getElementById('load-more-trigger'));
+        document.getElementById('close-focus').onclick = () => {
+            isPaused = false;
+            document.getElementById('focus-overlay').classList.add('hidden');
+        };
+
+        window.closeQualityModal = () => document.getElementById('quality-modal').classList.add('hidden');
+
+        const obs = new IntersectionObserver(ent => { if(ent[0].isIntersecting) generate(2); });
+        obs.observe(document.getElementById('load-more-trigger'));
     </script>
 </body>
 </html>
