@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Infinity Gifs Pro - X Support</title>
+    <title>Infinity Gifs - Larger Gallery</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js"></script>
     <style>
@@ -17,374 +17,376 @@
             overflow-x: hidden;
         }
 
-        .gif-card {
-            background: #0a0a0a;
-            border: 1px solid #1a1a1a;
-            border-radius: 32px;
-            overflow: hidden;
-            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-        }
-
-        .btn-gradient {
-            background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
-        }
-
+        .btn-gradient { background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%); }
         .shimmer {
             background: linear-gradient(90deg, #0a0a0a 25%, #151515 50%, #0a0a0a 75%);
             background-size: 200% 100%;
             animation: shimmer 1.5s infinite linear;
         }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-        .loader-spin {
-            border: 3px solid rgba(124, 58, 237, 0.1);
-            border-top: 3px solid #7c3aed;
-            border-radius: 50%;
-            width: 32px; height: 32px;
-            animation: spin 1s linear infinite;
+        .timeline-container {
+            position: relative;
+            height: 44px;
+            background: #111;
+            border-radius: 14px;
+            border: 1px solid #222;
         }
-
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .timeline-handle {
+            position: absolute;
+            top: -4px;
+            width: 16px;
+            height: 52px;
+            background: #7c3aed;
+            cursor: ew-resize;
+            border-radius: 6px;
+            border: 2px solid #fff;
+            z-index: 10;
+        }
+        .timeline-selection {
+            position: absolute;
+            height: 100%;
+            background: rgba(124, 58, 237, 0.3);
+            border-left: 2px solid #7c3aed;
+            border-right: 2px solid #7c3aed;
+        }
 
         .control-chip {
             cursor: pointer;
-            padding: 10px 16px;
+            padding: 10px 14px;
             border-radius: 12px;
             background: #111;
             border: 1px solid #222;
             transition: all 0.2s;
+            font-size: 12px;
             text-align: center;
-            font-size: 13px;
-            font-weight: 600;
         }
+        .control-chip.active { background: #7c3aed; border-color: #a78bfa; color: white; }
 
-        .control-chip.active {
-            background: #7c3aed;
-            border-color: #a78bfa;
-            color: white;
-        }
-
-        /* Progress Bar Pulse */
-        #global-progress {
-            transition: width 0.1s linear;
+        .page-transition { display: none; opacity: 0; }
+        .active-page { display: block; opacity: 1; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .gif-card {
+            min-height: 200px;
+            background: #0a0a0a;
         }
     </style>
 </head>
 <body class="pb-10">
 
-    <header class="sticky top-0 z-50 bg-black/70 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex justify-between items-center">
+    <header class="fixed top-0 w-full z-50 bg-black/80 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex justify-between items-center">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-purple-500/20">
+            <div class="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M10 8v8l6-4-6-4z"/></svg>
             </div>
-            <span class="text-xl font-black tracking-tight uppercase">INFINITY <span class="text-purple-500">PRO</span></span>
+            <span class="text-xl font-black tracking-tighter">INFINITY <span class="text-purple-500">GIFS</span></span>
         </div>
-        <button onclick="location.reload()" class="p-2 text-neutral-500 hover:text-white transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-        </button>
+        <div class="flex gap-2">
+             <button id="manual-btn" class="hidden bg-neutral-900 hover:bg-neutral-800 px-5 py-2.5 rounded-xl text-sm font-bold transition border border-white/10">تحديد لقطة يدوياً ✂️</button>
+             <button onclick="location.reload()" class="p-2.5 text-neutral-500 hover:text-white"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg></button>
+        </div>
     </header>
 
-    <!-- Upload Screen -->
-    <div id="upload-screen" class="max-w-md mx-auto mt-20 px-8 text-center">
-        <div class="w-24 h-24 bg-blue-600/10 rounded-[32px] mx-auto mb-8 flex items-center justify-center border-2 border-dashed border-blue-500/30">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-blue-400" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-        </div>
-        <h2 class="text-3xl font-black mb-3">دعم روابط X (Twitter)</h2>
-        <p class="text-neutral-500 mb-10 text-sm">تم تحديث المحرك لتجاوز حماية روابط تويتر المباشرة.</p>
+    <main class="pt-28 min-h-screen">
         
-        <label class="block w-full bg-white text-black font-black py-5 rounded-[24px] cursor-pointer mb-4 hover:bg-neutral-200 transition">
-            رفع ملف فيديو
-            <input type="file" id="video-input" accept="video/*" class="hidden">
-        </label>
-        
-        <div class="flex items-center gap-4 py-6 text-neutral-800 font-bold text-[10px] uppercase tracking-[0.2em]">
-            <hr class="flex-1 border-neutral-900">أو لصق رابط فيديو<hr class="flex-1 border-neutral-900">
-        </div>
-
-        <div class="space-y-4 text-right">
-            <div class="flex gap-2">
-                <input type="text" id="video-url" placeholder="https://video.twimg.com/..." class="flex-1 bg-neutral-900 border border-neutral-800 rounded-2xl px-5 py-4 text-sm focus:outline-none focus:border-blue-500 transition text-white">
-                <button id="url-btn" class="bg-blue-600 hover:bg-blue-500 px-6 rounded-2xl font-bold transition text-white">ابدأ</button>
+        <div id="page-upload" class="page-transition active-page max-w-md mx-auto px-8 text-center pt-10">
+            <div class="w-24 h-24 bg-purple-600/10 rounded-3xl mx-auto mb-8 flex items-center justify-center border border-purple-500/20">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
             </div>
+            <h2 class="text-4xl font-black mb-4 leading-tight">صناعة GIF باحترافية</h2>
             
-            <div id="initial-load-container" class="hidden w-full space-y-2 pt-4">
-                <div class="flex justify-between text-[10px] font-bold uppercase text-neutral-600">
-                    <span id="load-status-text">تجاوز حماية تويتر...</span>
-                    <span id="load-percentage">0%</span>
-                </div>
-                <div class="w-full h-1.5 bg-neutral-900 rounded-full overflow-hidden">
-                    <div id="initial-load-bar" class="h-full bg-blue-500 transition-all" style="width: 0%"></div>
-                </div>
+            <label class="block w-full bg-white text-black font-black py-5 rounded-2xl cursor-pointer mb-6 hover:bg-neutral-200 transition text-center shadow-xl text-lg">
+                اختر فيديو من جهازك
+                <input type="file" id="video-input" accept="video/*" class="hidden">
+            </label>
+            
+            <div class="flex gap-2 mb-10">
+                <input type="text" id="video-url" placeholder="رابط فيديو مباشر..." class="flex-1 bg-neutral-900 border border-neutral-800 rounded-xl px-5 py-4 text-sm focus:border-purple-600 outline-none">
+                <button id="url-btn" class="bg-purple-600 px-8 rounded-xl font-bold">فتح</button>
             </div>
+            <div id="loader" class="hidden mt-6"><div class="w-full h-1.5 bg-neutral-900 rounded-full overflow-hidden"><div id="load-bar" class="h-full bg-purple-600 w-0 transition-all"></div></div></div>
         </div>
-    </div>
 
-    <!-- Main Grid -->
-    <div id="feed-screen" class="hidden px-4 max-w-2xl mx-auto mt-6 space-y-8">
-        <div id="gif-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-        <div id="load-more-trigger" class="py-20 flex justify-center">
-            <div class="loader-spin"></div>
+        <div id="page-grid" class="page-transition px-4 max-w-6xl mx-auto">
+            <div class="flex justify-between items-center mb-10">
+                <h3 class="text-2xl font-black">لقطات تم استخراجها</h3>
+                <span class="bg-purple-600/20 text-purple-400 px-3 py-1 rounded-full text-[10px] font-bold">SMART SCAN</span>
+            </div>
+            <div id="gif-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8"></div>
+            <div id="load-more" class="py-20 flex justify-center opacity-40"><div class="w-8 h-8 border-3 border-t-purple-500 rounded-full animate-spin"></div></div>
         </div>
-    </div>
 
-    <!-- Advanced Settings Modal -->
-    <div id="quality-modal" class="fixed inset-0 z-[2000] bg-black/95 backdrop-blur-2xl flex items-center justify-center p-4 hidden">
-        <div class="w-full max-w-md bg-[#0a0a0a] border border-white/10 rounded-[40px] p-8 shadow-2xl">
-            <h4 class="text-2xl font-black mb-6 text-center text-white">إعدادات التصدير الذكي</h4>
-            
-            <div class="space-y-8">
-                <!-- Size Control -->
-                <div>
-                    <label class="text-[10px] font-black text-neutral-500 uppercase mb-3 block tracking-[0.2em]">أبعاد الصورة (الحجم)</label>
-                    <div class="grid grid-cols-3 gap-2">
-                        <div class="control-chip" data-type="size" data-val="360">360p</div>
-                        <div class="control-chip active" data-type="size" data-val="720">720p</div>
-                        <div class="control-chip" data-type="size" data-val="1080">1080p</div>
+        <div id="page-studio" class="page-transition px-6 max-w-6xl mx-auto">
+            <div class="flex flex-col lg:flex-row gap-10">
+                <div class="flex-1 space-y-8">
+                    <div class="bg-black rounded-[40px] overflow-hidden border border-white/10 relative aspect-video shadow-2xl">
+                        <video id="studio-video" muted playsinline class="w-full h-full object-contain bg-black"></video>
+                    </div>
+
+                    <div id="manual-controls" class="bg-neutral-900/50 p-8 rounded-[30px] border border-white/5">
+                        <div class="flex justify-between text-xs font-bold text-neutral-400 mb-6 uppercase tracking-widest">
+                            <span>البداية: <span id="start-label" class="text-white">0s</span></span>
+                            <span class="text-purple-400">المدة المحددة: <span id="dur-label" class="text-white">3s</span></span>
+                            <span>النهاية: <span id="end-label" class="text-white">3s</span></span>
+                        </div>
+                        <div class="timeline-container" id="timeline-box">
+                            <div class="timeline-selection" id="timeline-sel"></div>
+                            <div class="timeline-handle" id="h-start"></div>
+                            <div class="timeline-handle" id="h-end"></div>
+                        </div>
+                        <button onclick="switchPage('grid')" class="mt-6 flex items-center gap-2 text-sm font-bold text-neutral-500 hover:text-white transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                            العودة للمعرض
+                        </button>
                     </div>
                 </div>
 
-                <!-- Quality Control -->
-                <div>
-                    <label class="text-[10px] font-black text-neutral-500 uppercase mb-3 block tracking-[0.2em]">مستوى النعومة (FPS)</label>
-                    <div class="space-y-2">
-                        <div class="control-chip active flex justify-between items-center" data-type="quality" data-val="med">
-                            <span>متوازن</span><span class="text-[10px] opacity-50">15 FPS</span>
+                <div class="w-full lg:w-[350px] space-y-8">
+                    <div class="bg-neutral-900/80 p-8 rounded-[40px] border border-white/10 space-y-10">
+                        <div>
+                            <label class="text-xs font-black text-neutral-500 uppercase mb-5 block tracking-widest">دقة الـ GIF</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="control-chip active" data-type="size" data-val="480">480p</div>
+                                <div class="control-chip" data-type="size" data-val="720">720p</div>
+                                <div class="control-chip col-span-2 border-purple-500/20 text-purple-400" data-type="size" data-val="1080">1080p Ultra</div>
+                            </div>
                         </div>
-                        <div class="control-chip flex justify-between items-center border-blue-500/30 text-blue-400" data-type="quality" data-val="high">
-                            <span>فائق النعومة (Ultra)</span><span class="text-[10px] opacity-50">30 FPS</span>
+                        <div>
+                            <label class="text-xs font-black text-neutral-500 uppercase mb-5 block tracking-widest">سلاسة الحركة (FPS)</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="control-chip active" data-type="fps" data-val="15">15 FPS</div>
+                                <div class="control-chip" data-type="fps" data-val="24">24 FPS</div>
+                                <div class="control-chip" data-type="fps" data-val="30">30 FPS</div>
+                                <div class="control-chip border-blue-500/20 text-blue-400" data-type="fps" data-val="60">60 FPS</div>
+                            </div>
                         </div>
+                        <button id="render-btn" class="w-full btn-gradient py-6 rounded-2xl font-black text-lg shadow-2xl shadow-purple-500/30 active:scale-95 transition">تحويل وحفظ GIF</button>
                     </div>
                 </div>
             </div>
-
-            <button id="final-download-btn" class="w-full btn-gradient mt-10 py-5 rounded-[22px] font-black text-white shadow-xl shadow-purple-500/20 active:scale-95 transition">
-                استخراج بجودة عالية
-            </button>
-            <button onclick="closeQualityModal()" class="w-full mt-4 text-neutral-600 text-sm font-bold">إلغاء</button>
         </div>
+    </main>
+
+    <div id="render-overlay" class="fixed inset-0 z-[1000] bg-black/98 flex flex-col items-center justify-center hidden p-10">
+        <div class="w-20 h-20 border-4 border-neutral-900 border-t-purple-500 rounded-full animate-spin mb-10"></div>
+        <p class="text-3xl font-black mb-3">جاري المعالجة</p>
+        <p id="render-pct" class="text-purple-400 font-mono text-lg">FRAME: 0</p>
     </div>
 
-    <!-- Focus Preview -->
-    <div id="focus-overlay" class="fixed inset-0 bg-black/98 z-[1000] hidden flex flex-col items-center justify-center p-6">
-        <button id="close-focus" class="absolute top-8 right-8 p-3 bg-white/10 rounded-full text-white hover:bg-white/20 transition-all">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-        </button>
-        <div class="w-full max-w-4xl bg-black rounded-[40px] overflow-hidden border border-white/5 shadow-2xl">
-            <canvas id="focus-canvas" class="w-full aspect-video block object-contain"></canvas>
-            <div class="p-8 text-right flex justify-between items-center">
-                <div>
-                    <h3 class="text-2xl font-black">معاينة الانسيابية</h3>
-                    <p class="text-neutral-500 text-sm">الحركة التي تراها هي ما سيتم تصديره</p>
-                </div>
-                <button id="open-settings-btn" class="btn-gradient px-10 py-4 rounded-2xl font-black text-white shadow-lg shadow-purple-500/40">تجهيز التحميل</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Processing Overlay -->
-    <div id="global-processing" class="fixed inset-0 z-[3000] bg-black/95 flex flex-col items-center justify-center hidden p-10 text-center">
-        <div class="loader-spin w-20 h-20 mb-8 border-t-blue-500"></div>
-        <p class="text-2xl font-black text-white mb-2">جاري المعالجة الرقمية...</p>
-        <p id="render-status" class="text-neutral-500 text-sm mb-6 font-mono">FRAME: 0</p>
-        <div class="w-64 h-1.5 bg-neutral-900 rounded-full overflow-hidden">
-            <div id="global-progress" class="h-full bg-blue-500" style="width: 0%"></div>
-        </div>
-    </div>
-
-    <video id="source-video" crossorigin="anonymous" playsinline style="display:none"></video>
+    <video id="hidden-source" crossorigin="anonymous" style="display:none"></video>
 
     <script>
-        const sourceVideo = document.getElementById('source-video');
-        let workerBlobUrl = null;
-        let isPaused = false;
+        const studioVideo = document.getElementById('studio-video');
+        const hiddenSource = document.getElementById('hidden-source');
         let currentUrl = "";
-        let selection = { size: 720, quality: 'med' };
+        let workerBlobUrl = null;
+        let config = { start: 0, end: 3, size: 480, fps: 15 };
+        let isGridMode = true;
 
         async function init() {
             try {
-                const resp = await fetch('https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js');
-                workerBlobUrl = URL.createObjectURL(await resp.blob());
+                const r = await fetch('https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js');
+                const blob = await r.blob();
+                workerBlobUrl = URL.createObjectURL(blob);
             } catch(e) {}
         }
         init();
+
+        function switchPage(id) {
+            document.querySelectorAll('.page-transition').forEach(p => p.classList.remove('active-page'));
+            document.getElementById('page-' + id).classList.add('active-page');
+            isGridMode = (id === 'grid');
+            if(id === 'grid') studioVideo.pause();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        document.getElementById('url-btn').onclick = async () => {
+            const url = document.getElementById('video-url').value.trim();
+            if(!url) return;
+            document.getElementById('loader').classList.remove('hidden');
+            const proxied = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}&v=${Date.now()}`;
+            const testV = document.createElement('video');
+            testV.crossOrigin = "anonymous";
+            testV.src = proxied;
+            testV.onloadedmetadata = () => startApp(proxied);
+            testV.onerror = () => { 
+                testV.src = url; 
+                testV.onloadedmetadata = () => startApp(url); 
+                testV.onerror = () => {
+                    alert("عذراً، لا يمكن تحميل هذا الفيديو.");
+                    document.getElementById('loader').classList.add('hidden');
+                };
+            };
+        };
+
+        document.getElementById('video-input').onchange = (e) => {
+            if(e.target.files[0]) startApp(URL.createObjectURL(e.target.files[0]));
+        };
+
+        function startApp(src) {
+            currentUrl = src;
+            studioVideo.src = src;
+            hiddenSource.src = src;
+            studioVideo.onloadedmetadata = () => {
+                document.getElementById('manual-btn').classList.remove('hidden');
+                document.getElementById('loader').classList.add('hidden');
+                switchPage('grid');
+                document.getElementById('gif-grid').innerHTML = '';
+                generateGrid(6);
+                initTimeline();
+            };
+        }
+
+        function generateGrid(n) {
+            const grid = document.getElementById('gif-grid');
+            const duration = studioVideo.duration;
+            if(!duration || isNaN(duration)) return;
+
+            for(let i=0; i<n; i++) {
+                const safeMax = Math.max(0, duration - 4);
+                const s = Math.random() * safeMax;
+                
+                const card = document.createElement('div');
+                card.className = 'gif-card shimmer aspect-video rounded-[30px] overflow-hidden relative cursor-pointer hover:scale-[1.03] transition-all duration-500 shadow-xl border border-white/10';
+                card.onclick = () => openStudio(s, s+3);
+                grid.appendChild(card);
+                
+                const canvas = document.createElement('canvas');
+                canvas.className = 'w-full h-full object-cover opacity-0 transition-opacity duration-700';
+                card.appendChild(canvas);
+                
+                const v = document.createElement('video');
+                v.src = currentUrl; 
+                v.crossOrigin = "anonymous"; 
+                v.muted = true; 
+                v.currentTime = s;
+                
+                v.onloadeddata = () => {
+                    if (v.videoWidth === 0) return;
+                    canvas.width = 640; 
+                    canvas.height = 640 / (v.videoWidth / v.videoHeight);
+                    canvas.classList.remove('opacity-0'); 
+                    card.classList.remove('shimmer');
+                    const ctx = canvas.getContext('2d');
+                    
+                    const loop = () => {
+                        if(!isGridMode || v.paused) return;
+                        if(v.currentTime >= s + 3) v.currentTime = s;
+                        ctx.drawImage(v, 0, 0, canvas.width, canvas.height);
+                        requestAnimationFrame(loop);
+                    };
+                    v.play().then(() => loop()).catch(()=>{});
+                };
+            }
+        }
+
+        function openStudio(s, e) {
+            const dur = studioVideo.duration || 0;
+            config.start = Math.max(0, s);
+            config.end = Math.min(dur, e);
+            switchPage('studio');
+            studioVideo.currentTime = config.start;
+            studioVideo.play();
+            updateTimelineUI();
+        }
+
+        document.getElementById('manual-btn').onclick = () => {
+            openStudio(0, Math.min(4, studioVideo.duration || 0));
+        };
+
+        function initTimeline() {
+            const box = document.getElementById('timeline-box');
+            const hs = document.getElementById('h-start');
+            const he = document.getElementById('h-end');
+            
+            const handleDrag = (e, type) => {
+                const dur = studioVideo.duration;
+                if(!dur || isNaN(dur)) return;
+                const rect = box.getBoundingClientRect();
+                let clientX = e.clientX || (e.touches && e.touches[0].clientX);
+                let x = (clientX - rect.left) / rect.width;
+                x = Math.max(0, Math.min(1, x)) * dur;
+                if(type === 'start') config.start = Math.min(x, config.end - 0.2);
+                else config.end = Math.max(x, config.start + 0.2);
+                updateTimelineUI();
+                studioVideo.currentTime = (type === 'start') ? config.start : config.end;
+            };
+
+            const setupListeners = (el, type) => {
+                const moveHandler = (e) => handleDrag(e, type);
+                const stopHandler = () => {
+                    document.removeEventListener('mousemove', moveHandler);
+                    document.removeEventListener('mouseup', stopHandler);
+                    document.removeEventListener('touchmove', moveHandler);
+                    document.removeEventListener('touchend', stopHandler);
+                };
+                el.addEventListener('mousedown', () => {
+                    document.addEventListener('mousemove', moveHandler);
+                    document.addEventListener('mouseup', stopHandler);
+                });
+                el.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    document.addEventListener('touchmove', moveHandler, {passive:false});
+                    document.addEventListener('touchend', stopHandler);
+                });
+            };
+            setupListeners(hs, 'start');
+            setupListeners(he, 'end');
+        }
+
+        function updateTimelineUI() {
+            const dur = studioVideo.duration || 1;
+            const l = (config.start / dur) * 100;
+            const r = (config.end / dur) * 100;
+            document.getElementById('h-start').style.left = l + "%";
+            document.getElementById('h-end').style.left = r + "%";
+            document.getElementById('timeline-sel').style.left = l + "%";
+            document.getElementById('timeline-sel').style.width = (r - l) + "%";
+            document.getElementById('start-label').innerText = config.start.toFixed(1) + 's';
+            document.getElementById('end-label').innerText = config.end.toFixed(1) + 's';
+            document.getElementById('dur-label').innerText = (config.end - config.start).toFixed(1) + 's';
+        }
+
+        studioVideo.ontimeupdate = () => { 
+            if(studioVideo.currentTime >= config.end) studioVideo.currentTime = config.start; 
+        };
 
         document.querySelectorAll('.control-chip').forEach(chip => {
             chip.onclick = () => {
                 const type = chip.dataset.type;
                 document.querySelectorAll(`.control-chip[data-type="${type}"]`).forEach(c => c.classList.remove('active'));
                 chip.classList.add('active');
-                selection[type] = chip.dataset.val;
+                config[type] = parseInt(chip.dataset.val);
             };
         });
 
-        document.getElementById('url-btn').onclick = async () => {
-            const rawUrl = document.getElementById('video-url').value.trim();
-            if(!rawUrl) return;
-
-            document.getElementById('initial-load-container').classList.remove('hidden');
-            updateLoadProgress(20, "فحص الرابط...");
-
-            // المحرك المحدث لروابط تويتر
-            const proxiedUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(rawUrl)}&v=${Date.now()}`;
-            
-            try {
-                const testV = document.createElement('video');
-                testV.crossOrigin = "anonymous";
-                
-                // تجربة البروكسي فوراً لروابط تويتر لأنها غالباً ترفض الاتصال المباشر
-                testV.src = proxiedUrl;
-                
-                testV.onloadedmetadata = () => {
-                    updateLoadProgress(100, "تم الجلب بنجاح");
-                    loadVideo(proxiedUrl);
-                };
-                
-                testV.onerror = () => {
-                    // تجربة أخيرة بالرابط المباشر في حال كان السيرفر يسمح
-                    testV.src = rawUrl;
-                    testV.onloadedmetadata = () => loadVideo(rawUrl);
-                    testV.onerror = () => alert("فشل جلب الفيديو. تأكد أن الرابط مباشر وينتهي بـ .mp4");
-                };
-            } catch(e) {
-                alert("خطأ في الاتصال بالسيرفر");
-            }
-        };
-
-        function updateLoadProgress(p, status) {
-            document.getElementById('initial-load-bar').style.width = `${p}%`;
-            document.getElementById('load-percentage').innerText = `${p}%`;
-            document.getElementById('load-status-text').innerText = status;
-        }
-
-        document.getElementById('video-input').onchange = (e) => {
-            if(e.target.files[0]) loadVideo(URL.createObjectURL(e.target.files[0]));
-        };
-
-        function loadVideo(src) {
-            currentUrl = src;
-            sourceVideo.src = src;
-            sourceVideo.load();
-            sourceVideo.onloadedmetadata = () => {
-                document.getElementById('upload-screen').classList.add('hidden');
-                document.getElementById('feed-screen').classList.remove('hidden');
-                generate(6);
-            };
-        }
-
-        async function generate(n) {
-            for(let i=0; i<n; i++) {
-                const start = Math.random() * (sourceVideo.duration - 4);
-                const end = start + 3;
-                const card = document.createElement('div');
-                card.className = 'gif-card shimmer aspect-video relative group cursor-pointer';
-                card.onclick = () => openFocus(start, end);
-                document.getElementById('gif-grid').appendChild(card);
-
-                const canvas = document.createElement('canvas');
-                canvas.className = 'w-full h-full object-contain opacity-0 transition-opacity duration-700';
-                card.appendChild(canvas);
-
-                const v = document.createElement('video');
-                v.src = currentUrl;
-                v.crossOrigin = "anonymous";
-                v.muted = true;
-                v.currentTime = start;
-                
-                v.onloadeddata = () => {
-                    canvas.width = 480;
-                    canvas.height = 480 / (v.videoWidth/v.videoHeight);
-                    canvas.classList.remove('opacity-0');
-                    card.classList.remove('shimmer');
-                    const ctx = canvas.getContext('2d');
-                    const loop = () => {
-                        if(isPaused) return;
-                        if(v.currentTime >= end) v.currentTime = start;
-                        ctx.drawImage(v, 0, 0, canvas.width, canvas.height);
-                        v.play().catch(()=>{});
-                        requestAnimationFrame(loop);
-                    };
-                    loop();
-                };
-            }
-        }
-
-        function openFocus(s, e) {
-            isPaused = true;
-            document.getElementById('focus-overlay').classList.remove('hidden');
-            const fv = document.createElement('video');
-            fv.src = currentUrl; fv.crossOrigin="anonymous"; fv.muted=true; fv.currentTime=s;
-            const fc = document.getElementById('focus-canvas');
-            const fctx = fc.getContext('2d');
-            fv.onloadeddata = () => {
-                fc.width = 1280; fc.height = 1280/(fv.videoWidth/fv.videoHeight);
-                const floop = () => {
-                    if(!isPaused) return;
-                    if(fv.currentTime >= e) fv.currentTime = s;
-                    fctx.drawImage(fv, 0, 0, fc.width, fc.height);
-                    fv.play().catch(()=>{});
-                    requestAnimationFrame(floop);
-                };
-                floop();
-            };
-            window._pending = {s, e};
-            document.getElementById('open-settings-btn').onclick = () => {
-                document.getElementById('quality-modal').classList.remove('hidden');
-            };
-        }
-
-        document.getElementById('final-download-btn').onclick = async () => {
-            document.getElementById('quality-modal').classList.add('hidden');
-            document.getElementById('global-processing').classList.remove('hidden');
-            
-            const {s, e} = window._pending;
-            const width = parseInt(selection.size);
-            
-            let step = 0.06; // 15-18 FPS
-            let quality = 10;
-            if(selection.quality === 'high') { step = 0.033; quality = 5; }
-
-            const gif = new GIF({
-                workers: 4, quality: quality, width: width,
-                height: width / (sourceVideo.videoWidth/sourceVideo.videoHeight),
-                workerScript: workerBlobUrl
-            });
-
+        document.getElementById('render-btn').onclick = async () => {
+            document.getElementById('render-overlay').classList.remove('hidden');
+            const {start, end, size, fps} = config;
+            const step = 1 / fps;
+            const gif = new GIF({ workers: 4, quality: 10, width: size, height: size / (studioVideo.videoWidth/studioVideo.videoHeight), workerScript: workerBlobUrl });
             const tempC = document.createElement('canvas');
-            tempC.width = width; 
-            tempC.height = width / (sourceVideo.videoWidth/sourceVideo.videoHeight);
+            tempC.width = size; tempC.height = size / (studioVideo.videoWidth/studioVideo.videoHeight);
             const tctx = tempC.getContext('2d');
-
-            let cur = s;
-            let count = 0;
-            while(cur <= e) {
-                sourceVideo.currentTime = cur;
-                await new Promise(r => sourceVideo.onseeked = r);
-                tctx.drawImage(sourceVideo, 0, 0, width, tempC.height);
+            let cur = start;
+            while(cur <= end) {
+                hiddenSource.currentTime = cur;
+                await new Promise(r => hiddenSource.onseeked = r);
+                tctx.drawImage(hiddenSource, 0, 0, size, tempC.height);
                 gif.addFrame(tctx, {copy: true, delay: step * 1000});
                 cur += step;
-                count++;
-                document.getElementById('render-status').innerText = `FRAME: ${count}`;
-                document.getElementById('global-progress').style.width = `${((cur-s)/(e-s))*100}%`;
+                document.getElementById('render-pct').innerText = `FRAME: ${Math.round(cur*fps)}`;
             }
-
             gif.on('finished', blob => {
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = `X-Infinity-${selection.size}p.gif`;
-                a.click();
-                document.getElementById('global-processing').classList.add('hidden');
+                const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `infinity.gif`; a.click();
+                document.getElementById('render-overlay').classList.add('hidden');
             });
             gif.render();
         };
 
-        document.getElementById('close-focus').onclick = () => {
-            isPaused = false;
-            document.getElementById('focus-overlay').classList.add('hidden');
-        };
-
-        window.closeQualityModal = () => document.getElementById('quality-modal').classList.add('hidden');
-
-        const obs = new IntersectionObserver(ent => { if(ent[0].isIntersecting) generate(2); });
-        obs.observe(document.getElementById('load-more-trigger'));
+        const obs = new IntersectionObserver(e => { if(e[0].isIntersecting && isGridMode && studioVideo.duration > 0) generateGrid(2); });
+        obs.observe(document.getElementById('load-more'));
     </script>
 </body>
 </html>
