@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Infinity Gifs Pro - Custom Studio</title>
+    <title>Infinity Gifs Pro - X Support</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js"></script>
     <style>
@@ -62,6 +62,11 @@
             border-color: #a78bfa;
             color: white;
         }
+
+        /* Progress Bar Pulse */
+        #global-progress {
+            transition: width 0.1s linear;
+        }
     </style>
 </head>
 <body class="pb-10">
@@ -80,34 +85,34 @@
 
     <!-- Upload Screen -->
     <div id="upload-screen" class="max-w-md mx-auto mt-20 px-8 text-center">
-        <div class="w-24 h-24 bg-purple-600/10 rounded-[32px] mx-auto mb-8 flex items-center justify-center border-2 border-dashed border-purple-500/30">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+        <div class="w-24 h-24 bg-blue-600/10 rounded-[32px] mx-auto mb-8 flex items-center justify-center border-2 border-dashed border-blue-500/30">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-blue-400" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
         </div>
-        <h2 class="text-3xl font-black mb-3 text-white">استوديو الجفات المخصص</h2>
-        <p class="text-neutral-500 mb-10 text-sm">تحكم كامل في الحجم والجودة والنعومة.</p>
+        <h2 class="text-3xl font-black mb-3">دعم روابط X (Twitter)</h2>
+        <p class="text-neutral-500 mb-10 text-sm">تم تحديث المحرك لتجاوز حماية روابط تويتر المباشرة.</p>
         
         <label class="block w-full bg-white text-black font-black py-5 rounded-[24px] cursor-pointer mb-4 hover:bg-neutral-200 transition">
-            اختر فيديو من الجهاز
+            رفع ملف فيديو
             <input type="file" id="video-input" accept="video/*" class="hidden">
         </label>
         
         <div class="flex items-center gap-4 py-6 text-neutral-800 font-bold text-[10px] uppercase tracking-[0.2em]">
-            <hr class="flex-1 border-neutral-900">أو رابط فيديو مباشر<hr class="flex-1 border-neutral-900">
+            <hr class="flex-1 border-neutral-900">أو لصق رابط فيديو<hr class="flex-1 border-neutral-900">
         </div>
 
-        <div class="space-y-4">
+        <div class="space-y-4 text-right">
             <div class="flex gap-2">
-                <input type="text" id="video-url" placeholder="https://..." class="flex-1 bg-neutral-900 border border-neutral-800 rounded-2xl px-5 py-4 text-sm focus:outline-none focus:border-purple-600 transition text-white">
-                <button id="url-btn" class="bg-neutral-800 hover:bg-neutral-700 px-6 rounded-2xl font-bold transition text-white">فتح</button>
+                <input type="text" id="video-url" placeholder="https://video.twimg.com/..." class="flex-1 bg-neutral-900 border border-neutral-800 rounded-2xl px-5 py-4 text-sm focus:outline-none focus:border-blue-500 transition text-white">
+                <button id="url-btn" class="bg-blue-600 hover:bg-blue-500 px-6 rounded-2xl font-bold transition text-white">ابدأ</button>
             </div>
             
-            <div id="initial-load-container" class="hidden w-full space-y-2">
+            <div id="initial-load-container" class="hidden w-full space-y-2 pt-4">
                 <div class="flex justify-between text-[10px] font-bold uppercase text-neutral-600">
-                    <span id="load-status-text">جاري فحص التوافق...</span>
+                    <span id="load-status-text">تجاوز حماية تويتر...</span>
                     <span id="load-percentage">0%</span>
                 </div>
                 <div class="w-full h-1.5 bg-neutral-900 rounded-full overflow-hidden">
-                    <div id="initial-load-bar" class="h-full btn-gradient transition-all" style="width: 0%"></div>
+                    <div id="initial-load-bar" class="h-full bg-blue-500 transition-all" style="width: 0%"></div>
                 </div>
             </div>
         </div>
@@ -122,32 +127,29 @@
     </div>
 
     <!-- Advanced Settings Modal -->
-    <div id="quality-modal" class="fixed inset-0 z-[2000] bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 hidden">
+    <div id="quality-modal" class="fixed inset-0 z-[2000] bg-black/95 backdrop-blur-2xl flex items-center justify-center p-4 hidden">
         <div class="w-full max-w-md bg-[#0a0a0a] border border-white/10 rounded-[40px] p-8 shadow-2xl">
-            <h4 class="text-2xl font-black mb-6 text-center">إعدادات التصدير</h4>
+            <h4 class="text-2xl font-black mb-6 text-center text-white">إعدادات التصدير الذكي</h4>
             
             <div class="space-y-8">
                 <!-- Size Control -->
                 <div>
-                    <label class="text-xs font-black text-neutral-500 uppercase mb-3 block tracking-widest">أبعاد الصورة (الحجم)</label>
+                    <label class="text-[10px] font-black text-neutral-500 uppercase mb-3 block tracking-[0.2em]">أبعاد الصورة (الحجم)</label>
                     <div class="grid grid-cols-3 gap-2">
-                        <div class="control-chip" data-type="size" data-val="320">320p</div>
-                        <div class="control-chip active" data-type="size" data-val="640">640p</div>
+                        <div class="control-chip" data-type="size" data-val="360">360p</div>
+                        <div class="control-chip active" data-type="size" data-val="720">720p</div>
                         <div class="control-chip" data-type="size" data-val="1080">1080p</div>
                     </div>
                 </div>
 
                 <!-- Quality Control -->
                 <div>
-                    <label class="text-xs font-black text-neutral-500 uppercase mb-3 block tracking-widest">مستوى الجودة والنعومة</label>
+                    <label class="text-[10px] font-black text-neutral-500 uppercase mb-3 block tracking-[0.2em]">مستوى النعومة (FPS)</label>
                     <div class="space-y-2">
-                        <div class="control-chip flex justify-between items-center" data-type="quality" data-val="low">
-                            <span>اقتصادي</span><span class="text-[10px] opacity-50">10 FPS</span>
-                        </div>
                         <div class="control-chip active flex justify-between items-center" data-type="quality" data-val="med">
-                            <span>متوازن</span><span class="text-[10px] opacity-50">18 FPS</span>
+                            <span>متوازن</span><span class="text-[10px] opacity-50">15 FPS</span>
                         </div>
-                        <div class="control-chip flex justify-between items-center border-purple-500/30 text-purple-400" data-type="quality" data-val="high">
+                        <div class="control-chip flex justify-between items-center border-blue-500/30 text-blue-400" data-type="quality" data-val="high">
                             <span>فائق النعومة (Ultra)</span><span class="text-[10px] opacity-50">30 FPS</span>
                         </div>
                     </div>
@@ -155,7 +157,7 @@
             </div>
 
             <button id="final-download-btn" class="w-full btn-gradient mt-10 py-5 rounded-[22px] font-black text-white shadow-xl shadow-purple-500/20 active:scale-95 transition">
-                بدء استخراج الملف
+                استخراج بجودة عالية
             </button>
             <button onclick="closeQualityModal()" class="w-full mt-4 text-neutral-600 text-sm font-bold">إلغاء</button>
         </div>
@@ -163,28 +165,28 @@
 
     <!-- Focus Preview -->
     <div id="focus-overlay" class="fixed inset-0 bg-black/98 z-[1000] hidden flex flex-col items-center justify-center p-6">
-        <button id="close-focus" class="absolute top-8 right-8 p-3 bg-white/10 rounded-full text-white hover:bg-white/20">
+        <button id="close-focus" class="absolute top-8 right-8 p-3 bg-white/10 rounded-full text-white hover:bg-white/20 transition-all">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
         </button>
-        <div class="w-full max-w-4xl bg-black rounded-[40px] overflow-hidden border border-white/5">
+        <div class="w-full max-w-4xl bg-black rounded-[40px] overflow-hidden border border-white/5 shadow-2xl">
             <canvas id="focus-canvas" class="w-full aspect-video block object-contain"></canvas>
             <div class="p-8 text-right flex justify-between items-center">
                 <div>
-                    <h3 class="text-2xl font-black">معاينة اللقطة</h3>
-                    <p class="text-neutral-500 text-sm">حدد خيارات الجودة قبل التحميل</p>
+                    <h3 class="text-2xl font-black">معاينة الانسيابية</h3>
+                    <p class="text-neutral-500 text-sm">الحركة التي تراها هي ما سيتم تصديره</p>
                 </div>
-                <button id="open-settings-btn" class="btn-gradient px-10 py-4 rounded-2xl font-black text-white">تخصيص وتحميل</button>
+                <button id="open-settings-btn" class="btn-gradient px-10 py-4 rounded-2xl font-black text-white shadow-lg shadow-purple-500/40">تجهيز التحميل</button>
             </div>
         </div>
     </div>
 
     <!-- Processing Overlay -->
     <div id="global-processing" class="fixed inset-0 z-[3000] bg-black/95 flex flex-col items-center justify-center hidden p-10 text-center">
-        <div class="loader-spin w-20 h-20 mb-8 border-t-purple-500"></div>
+        <div class="loader-spin w-20 h-20 mb-8 border-t-blue-500"></div>
         <p class="text-2xl font-black text-white mb-2">جاري المعالجة الرقمية...</p>
-        <p id="render-status" class="text-neutral-500 text-sm mb-6 font-mono tracking-tighter">FRAME: 0</p>
+        <p id="render-status" class="text-neutral-500 text-sm mb-6 font-mono">FRAME: 0</p>
         <div class="w-64 h-1.5 bg-neutral-900 rounded-full overflow-hidden">
-            <div id="global-progress" class="h-full btn-gradient transition-all" style="width: 0%"></div>
+            <div id="global-progress" class="h-full bg-blue-500" style="width: 0%"></div>
         </div>
     </div>
 
@@ -195,9 +197,8 @@
         let workerBlobUrl = null;
         let isPaused = false;
         let currentUrl = "";
-        let selection = { size: 640, quality: 'med' };
+        let selection = { size: 720, quality: 'med' };
 
-        // Initialize Workers for GitHub Pages compatibility
         async function init() {
             try {
                 const resp = await fetch('https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js');
@@ -206,7 +207,6 @@
         }
         init();
 
-        // Control Logic
         document.querySelectorAll('.control-chip').forEach(chip => {
             chip.onclick = () => {
                 const type = chip.dataset.type;
@@ -216,21 +216,44 @@
             };
         });
 
-        // App Start
         document.getElementById('url-btn').onclick = async () => {
-            const url = document.getElementById('video-url').value;
-            if(!url) return;
+            const rawUrl = document.getElementById('video-url').value.trim();
+            if(!rawUrl) return;
+
             document.getElementById('initial-load-container').classList.remove('hidden');
+            updateLoadProgress(20, "فحص الرابط...");
+
+            // المحرك المحدث لروابط تويتر
+            const proxiedUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(rawUrl)}&v=${Date.now()}`;
             
-            // Smart Bypass for GitHub Pages
-            const proxied = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-            const testV = document.createElement('video');
-            testV.crossOrigin = "anonymous";
-            testV.src = url;
-            
-            testV.onloadedmetadata = () => loadVideo(url);
-            testV.onerror = () => loadVideo(proxied);
+            try {
+                const testV = document.createElement('video');
+                testV.crossOrigin = "anonymous";
+                
+                // تجربة البروكسي فوراً لروابط تويتر لأنها غالباً ترفض الاتصال المباشر
+                testV.src = proxiedUrl;
+                
+                testV.onloadedmetadata = () => {
+                    updateLoadProgress(100, "تم الجلب بنجاح");
+                    loadVideo(proxiedUrl);
+                };
+                
+                testV.onerror = () => {
+                    // تجربة أخيرة بالرابط المباشر في حال كان السيرفر يسمح
+                    testV.src = rawUrl;
+                    testV.onloadedmetadata = () => loadVideo(rawUrl);
+                    testV.onerror = () => alert("فشل جلب الفيديو. تأكد أن الرابط مباشر وينتهي بـ .mp4");
+                };
+            } catch(e) {
+                alert("خطأ في الاتصال بالسيرفر");
+            }
         };
+
+        function updateLoadProgress(p, status) {
+            document.getElementById('initial-load-bar').style.width = `${p}%`;
+            document.getElementById('load-percentage').innerText = `${p}%`;
+            document.getElementById('load-status-text').innerText = status;
+        }
 
         document.getElementById('video-input').onchange = (e) => {
             if(e.target.files[0]) loadVideo(URL.createObjectURL(e.target.files[0]));
@@ -243,7 +266,7 @@
             sourceVideo.onloadedmetadata = () => {
                 document.getElementById('upload-screen').classList.add('hidden');
                 document.getElementById('feed-screen').classList.remove('hidden');
-                generate(4);
+                generate(6);
             };
         }
 
@@ -315,11 +338,9 @@
             const {s, e} = window._pending;
             const width = parseInt(selection.size);
             
-            // FPS logic
-            let step = 0.1; // Med 10fps
+            let step = 0.06; // 15-18 FPS
             let quality = 10;
-            if(selection.quality === 'low') { step = 0.15; quality = 20; }
-            if(selection.quality === 'high') { step = 0.033; quality = 2; } // 30fps
+            if(selection.quality === 'high') { step = 0.033; quality = 5; }
 
             const gif = new GIF({
                 workers: 4, quality: quality, width: width,
@@ -348,7 +369,7 @@
             gif.on('finished', blob => {
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
-                a.download = `Infinity-${selection.size}p-${selection.quality}.gif`;
+                a.download = `X-Infinity-${selection.size}p.gif`;
                 a.click();
                 document.getElementById('global-processing').classList.add('hidden');
             });
