@@ -2,8 +2,8 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Infinity Gifs - Larger Gallery</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Infinity Gifs - Pro Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js"></script>
     <style>
@@ -13,344 +13,259 @@
             font-family: 'Cairo', sans-serif;
             background-color: #000;
             color: #fff;
-            user-select: none;
             overflow-x: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .btn-gradient { background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%); }
-        .shimmer {
-            background: linear-gradient(90deg, #0a0a0a 25%, #151515 50%, #0a0a0a 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite linear;
-        }
-        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-
+        
         .timeline-container {
             position: relative;
-            height: 44px;
+            height: 60px;
             background: #111;
-            border-radius: 14px;
-            border: 1px solid #222;
+            border-radius: 12px;
+            border: 2px solid #222;
+            margin: 20px 0;
+            overflow: hidden;
+            touch-action: none; 
         }
-        .timeline-handle {
-            position: absolute;
-            top: -4px;
-            width: 16px;
-            height: 52px;
-            background: #7c3aed;
-            cursor: ew-resize;
-            border-radius: 6px;
-            border: 2px solid #fff;
-            z-index: 10;
-        }
+
         .timeline-selection {
             position: absolute;
             height: 100%;
-            background: rgba(124, 58, 237, 0.3);
-            border-left: 2px solid #7c3aed;
-            border-right: 2px solid #7c3aed;
+            background: rgba(124, 58, 237, 0.2);
+            border-left: 3px solid #7c3aed;
+            border-right: 3px solid #7c3aed;
+            z-index: 10;
+        }
+
+        .timeline-handle {
+            position: absolute;
+            top: 0;
+            width: 30px; 
+            height: 100%;
+            background: #7c3aed;
+            cursor: ew-resize;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(124, 58, 237, 0.4);
+        }
+
+        .timeline-handle::after {
+            content: '';
+            width: 2px;
+            height: 20px;
+            background: white;
+            border-radius: 2px;
         }
 
         .control-chip {
             cursor: pointer;
-            padding: 10px 14px;
+            padding: 10px;
             border-radius: 12px;
-            background: #111;
-            border: 1px solid #222;
+            background: #151515;
+            border: 1px solid #333;
             transition: all 0.2s;
-            font-size: 12px;
+            font-size: 13px;
+            font-weight: bold;
             text-align: center;
         }
-        .control-chip.active { background: #7c3aed; border-color: #a78bfa; color: white; }
-
-        .page-transition { display: none; opacity: 0; }
-        .active-page { display: block; opacity: 1; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .gif-card {
-            min-height: 200px;
-            background: #0a0a0a;
+        .control-chip.active { 
+            background: #7c3aed; 
+            border-color: #a78bfa; 
+            color: white;
+            box-shadow: 0 0 15px rgba(124, 58, 237, 0.3);
         }
+
+        .page-transition { display: none; }
+        .active-page { display: block; }
+        
+        .time-input-box {
+            background: #111;
+            border: 2px solid #333;
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+            width: 100%;
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #fff;
+            outline: none;
+        }
+        .time-input-box:focus { border-color: #7c3aed; }
+        
+        #render-overlay {
+            backdrop-filter: blur(10px);
+        }
+
+        #status-bar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(20, 20, 20, 0.9);
+            padding: 12px 24px;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 14px;
+            font-weight: bold;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        main { position: relative; z-index: 10; }
     </style>
 </head>
-<body class="pb-10">
+<body class="pb-20">
 
-    <header class="fixed top-0 w-full z-50 bg-black/80 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex justify-between items-center">
+    <header class="fixed top-0 w-full z-50 bg-black/95 border-b border-white/5 px-6 py-4 flex justify-between items-center backdrop-blur-md">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M10 8v8l6-4-6-4z"/></svg>
             </div>
-            <span class="text-xl font-black tracking-tighter">INFINITY <span class="text-purple-500">GIFS</span></span>
+            <span class="text-xl font-black tracking-tighter uppercase">Infinity <span class="text-purple-500">Gifs</span></span>
         </div>
         <div class="flex gap-2">
-             <button id="manual-btn" class="hidden bg-neutral-900 hover:bg-neutral-800 px-5 py-2.5 rounded-xl text-sm font-bold transition border border-white/10">تحديد لقطة يدوياً ✂️</button>
+             <button id="manual-btn" class="hidden bg-neutral-900 hover:bg-neutral-800 px-5 py-2.5 rounded-xl text-sm font-bold transition border border-white/10">المحرر ✂️</button>
              <button onclick="location.reload()" class="p-2.5 text-neutral-500 hover:text-white"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg></button>
         </div>
     </header>
 
-    <main class="pt-28 min-h-screen">
-        
+    <main class="pt-28">
         <div id="page-upload" class="page-transition active-page max-w-md mx-auto px-8 text-center pt-10">
-            <div class="w-24 h-24 bg-purple-600/10 rounded-3xl mx-auto mb-8 flex items-center justify-center border border-purple-500/20">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-            </div>
-            <h2 class="text-4xl font-black mb-4 leading-tight">صناعة GIF باحترافية</h2>
-            
+            <h2 class="text-4xl font-black mb-10">مرحباً بك</h2>
             <label class="block w-full bg-white text-black font-black py-5 rounded-2xl cursor-pointer mb-6 hover:bg-neutral-200 transition text-center shadow-xl text-lg">
                 اختر فيديو من جهازك
                 <input type="file" id="video-input" accept="video/*" class="hidden">
             </label>
-            
             <div class="flex gap-2 mb-10">
-                <input type="text" id="video-url" placeholder="رابط فيديو مباشر..." class="flex-1 bg-neutral-900 border border-neutral-800 rounded-xl px-5 py-4 text-sm focus:border-purple-600 outline-none">
+                <input type="text" id="video-url" placeholder="ضع رابط تويتر أو MP4 هنا..." class="flex-1 bg-neutral-900 border border-neutral-800 rounded-xl px-5 py-4 text-sm focus:border-purple-600 outline-none text-right">
                 <button id="url-btn" class="bg-purple-600 px-8 rounded-xl font-bold">فتح</button>
             </div>
-            <div id="loader" class="hidden mt-6"><div class="w-full h-1.5 bg-neutral-900 rounded-full overflow-hidden"><div id="load-bar" class="h-full bg-purple-600 w-0 transition-all"></div></div></div>
         </div>
 
         <div id="page-grid" class="page-transition px-4 max-w-6xl mx-auto">
-            <div class="flex justify-between items-center mb-10">
-                <h3 class="text-2xl font-black">لقطات تم استخراجها</h3>
-                <span class="bg-purple-600/20 text-purple-400 px-3 py-1 rounded-full text-[10px] font-bold">SMART SCAN</span>
-            </div>
-            <div id="gif-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8"></div>
+            <h3 class="text-2xl font-black mb-8">اقتراحات ذكية</h3>
+            <div id="gif-grid" class="grid grid-cols-1 md:grid-cols-2 gap-8"></div>
             <div id="load-more" class="py-20 flex justify-center opacity-40"><div class="w-8 h-8 border-3 border-t-purple-500 rounded-full animate-spin"></div></div>
         </div>
 
-        <div id="page-studio" class="page-transition px-6 max-w-6xl mx-auto">
-            <div class="flex flex-col lg:flex-row gap-10">
-                <div class="flex-1 space-y-8">
-                    <div class="bg-black rounded-[40px] overflow-hidden border border-white/10 relative aspect-video shadow-2xl">
-                        <video id="studio-video" muted playsinline class="w-full h-full object-contain bg-black"></video>
+        <div id="page-studio" class="page-transition px-6 max-w-6xl mx-auto pb-20">
+            <div class="flex flex-col lg:flex-row gap-8">
+                <div class="flex-1 space-y-6">
+                    <div class="bg-black rounded-3xl overflow-hidden border border-white/10 relative aspect-video shadow-2xl">
+                        <video id="studio-video" crossorigin="anonymous" muted playsinline class="w-full h-full object-contain"></video>
                     </div>
 
-                    <div id="manual-controls" class="bg-neutral-900/50 p-8 rounded-[30px] border border-white/5">
-                        <div class="flex justify-between text-xs font-bold text-neutral-400 mb-6 uppercase tracking-widest">
-                            <span>البداية: <span id="start-label" class="text-white">0s</span></span>
-                            <span class="text-purple-400">المدة المحددة: <span id="dur-label" class="text-white">3s</span></span>
-                            <span>النهاية: <span id="end-label" class="text-white">3s</span></span>
+                    <div class="bg-neutral-900/40 p-6 rounded-3xl border border-white/5">
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div>
+                                <label class="text-neutral-500 text-xs mb-2 block">وقت البداية</label>
+                                <input type="text" id="start-time-input" class="time-input-box" value="00:00:00">
+                            </div>
+                            <div>
+                                <label class="text-neutral-500 text-xs mb-2 block">وقت النهاية</label>
+                                <input type="text" id="end-time-input" class="time-input-box" value="00:00:03">
+                            </div>
                         </div>
+
                         <div class="timeline-container" id="timeline-box">
                             <div class="timeline-selection" id="timeline-sel"></div>
-                            <div class="timeline-handle" id="h-start"></div>
-                            <div class="timeline-handle" id="h-end"></div>
+                            <div class="timeline-handle" id="h-start" style="left: 0%;"></div>
+                            <div class="timeline-handle" id="h-end" style="left: 30%;"></div>
                         </div>
-                        <button onclick="switchPage('grid')" class="mt-6 flex items-center gap-2 text-sm font-bold text-neutral-500 hover:text-white transition">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-                            العودة للمعرض
-                        </button>
+
+                        <div class="flex justify-between text-xs font-bold text-neutral-400 mt-2">
+                            <span>المدة المحددة: <span id="dur-label" class="text-purple-400">0s</span></span>
+                            <button onclick="switchPage('grid')" class="text-neutral-500 hover:text-white underline">العودة للمعرض</button>
+                        </div>
                     </div>
                 </div>
 
-                <div class="w-full lg:w-[350px] space-y-8">
-                    <div class="bg-neutral-900/80 p-8 rounded-[40px] border border-white/10 space-y-10">
+                <div class="w-full lg:w-[320px] space-y-4">
+                    <div class="bg-neutral-900/60 p-6 rounded-3xl border border-white/10 space-y-6">
                         <div>
-                            <label class="text-xs font-black text-neutral-500 uppercase mb-5 block tracking-widest">دقة الـ GIF</label>
-                            <div class="grid grid-cols-2 gap-3">
+                            <label class="text-[10px] font-black text-neutral-500 uppercase mb-3 block text-right">دقة الفيديو</label>
+                            <div class="grid grid-cols-3 gap-2">
                                 <div class="control-chip active" data-type="size" data-val="480">480p</div>
                                 <div class="control-chip" data-type="size" data-val="720">720p</div>
-                                <div class="control-chip col-span-2 border-purple-500/20 text-purple-400" data-type="size" data-val="1080">1080p Ultra</div>
+                                <div class="control-chip" data-type="size" data-val="1080">1080p</div>
                             </div>
                         </div>
+
                         <div>
-                            <label class="text-xs font-black text-neutral-500 uppercase mb-5 block tracking-widest">سلاسة الحركة (FPS)</label>
-                            <div class="grid grid-cols-2 gap-3">
-                                <div class="control-chip active" data-type="fps" data-val="15">15 FPS</div>
-                                <div class="control-chip" data-type="fps" data-val="24">24 FPS</div>
-                                <div class="control-chip" data-type="fps" data-val="30">30 FPS</div>
-                                <div class="control-chip border-blue-500/20 text-blue-400" data-type="fps" data-val="60">60 FPS</div>
+                            <label class="text-[10px] font-black text-neutral-500 uppercase mb-3 block text-right">سلاسة الحركة (FPS)</label>
+                            <div class="grid grid-cols-4 gap-2">
+                                <div class="control-chip" data-type="fps" data-val="10">10</div>
+                                <div class="control-chip active" data-type="fps" data-val="15">15</div>
+                                <div class="control-chip" data-type="fps" data-val="24">24</div>
+                                <div class="control-chip" data-type="fps" data-val="30">30</div>
                             </div>
                         </div>
-                        <button id="render-btn" class="w-full btn-gradient py-6 rounded-2xl font-black text-lg shadow-2xl shadow-purple-500/30 active:scale-95 transition">تحويل وحفظ GIF</button>
+
+                        <button id="render-btn" class="w-full btn-gradient py-5 rounded-2xl font-black text-lg shadow-xl active:scale-95 transition">استخراج GIF</button>
                     </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <div id="render-overlay" class="fixed inset-0 z-[1000] bg-black/98 flex flex-col items-center justify-center hidden p-10">
-        <div class="w-20 h-20 border-4 border-neutral-900 border-t-purple-500 rounded-full animate-spin mb-10"></div>
-        <p class="text-3xl font-black mb-3">جاري المعالجة</p>
-        <p id="render-pct" class="text-purple-400 font-mono text-lg">FRAME: 0</p>
+    <div id="status-bar"></div>
+
+    <div id="render-overlay" class="fixed inset-0 z-[1000] bg-black/90 flex flex-col items-center justify-center hidden">
+        <div class="w-16 h-16 border-4 border-white/10 border-t-purple-500 rounded-full animate-spin mb-6"></div>
+        <p class="text-white font-bold mb-2">جاري المعالجة...</p>
+        <p id="render-pct" class="text-purple-400 font-black text-2xl">0%</p>
     </div>
 
-    <video id="hidden-source" crossorigin="anonymous" style="display:none"></video>
-
     <script>
-        const studioVideo = document.getElementById('studio-video');
-        const hiddenSource = document.getElementById('hidden-source');
-        let currentUrl = "";
-        let workerBlobUrl = null;
+        const video = document.getElementById('studio-video');
+        const startInput = document.getElementById('start-time-input');
+        const endInput = document.getElementById('end-time-input');
+        const statusBar = document.getElementById('status-bar');
+        
         let config = { start: 0, end: 3, size: 480, fps: 15 };
+        let workerBlobUrl = "";
         let isGridMode = true;
 
-        async function init() {
-            try {
-                const r = await fetch('https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js');
-                const blob = await r.blob();
-                workerBlobUrl = URL.createObjectURL(blob);
-            } catch(e) {}
+        fetch('https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js')
+            .then(r => r.blob()).then(b => workerBlobUrl = URL.createObjectURL(b));
+
+        function showStatus(msg, type = 'info') {
+            statusBar.innerText = msg;
+            statusBar.style.display = 'block';
+            statusBar.style.color = type === 'error' ? '#ff4444' : '#a855f7';
+            if (type === 'error') {
+                setTimeout(() => statusBar.style.display = 'none', 5000);
+            }
         }
-        init();
 
         function switchPage(id) {
             document.querySelectorAll('.page-transition').forEach(p => p.classList.remove('active-page'));
             document.getElementById('page-' + id).classList.add('active-page');
             isGridMode = (id === 'grid');
-            if(id === 'grid') studioVideo.pause();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            if(id === 'grid') video.pause();
+            window.scrollTo(0,0);
         }
 
-        document.getElementById('url-btn').onclick = async () => {
-            const url = document.getElementById('video-url').value.trim();
-            if(!url) return;
-            document.getElementById('loader').classList.remove('hidden');
-            const proxied = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}&v=${Date.now()}`;
-            const testV = document.createElement('video');
-            testV.crossOrigin = "anonymous";
-            testV.src = proxied;
-            testV.onloadedmetadata = () => startApp(proxied);
-            testV.onerror = () => { 
-                testV.src = url; 
-                testV.onloadedmetadata = () => startApp(url); 
-                testV.onerror = () => {
-                    alert("عذراً، لا يمكن تحميل هذا الفيديو.");
-                    document.getElementById('loader').classList.add('hidden');
-                };
-            };
-        };
-
-        document.getElementById('video-input').onchange = (e) => {
-            if(e.target.files[0]) startApp(URL.createObjectURL(e.target.files[0]));
-        };
-
-        function startApp(src) {
-            currentUrl = src;
-            studioVideo.src = src;
-            hiddenSource.src = src;
-            studioVideo.onloadedmetadata = () => {
-                document.getElementById('manual-btn').classList.remove('hidden');
-                document.getElementById('loader').classList.add('hidden');
-                switchPage('grid');
-                document.getElementById('gif-grid').innerHTML = '';
-                generateGrid(6);
-                initTimeline();
-            };
+        function formatTime(s) {
+            if(isNaN(s)) return "00:00:00";
+            return new Date(s * 1000).toISOString().substr(11, 8);
         }
 
-        function generateGrid(n) {
-            const grid = document.getElementById('gif-grid');
-            const duration = studioVideo.duration;
-            if(!duration || isNaN(duration)) return;
-
-            for(let i=0; i<n; i++) {
-                const safeMax = Math.max(0, duration - 4);
-                const s = Math.random() * safeMax;
-                
-                const card = document.createElement('div');
-                card.className = 'gif-card shimmer aspect-video rounded-[30px] overflow-hidden relative cursor-pointer hover:scale-[1.03] transition-all duration-500 shadow-xl border border-white/10';
-                card.onclick = () => openStudio(s, s+3);
-                grid.appendChild(card);
-                
-                const canvas = document.createElement('canvas');
-                canvas.className = 'w-full h-full object-cover opacity-0 transition-opacity duration-700';
-                card.appendChild(canvas);
-                
-                const v = document.createElement('video');
-                v.src = currentUrl; 
-                v.crossOrigin = "anonymous"; 
-                v.muted = true; 
-                v.currentTime = s;
-                
-                v.onloadeddata = () => {
-                    if (v.videoWidth === 0) return;
-                    canvas.width = 640; 
-                    canvas.height = 640 / (v.videoWidth / v.videoHeight);
-                    canvas.classList.remove('opacity-0'); 
-                    card.classList.remove('shimmer');
-                    const ctx = canvas.getContext('2d');
-                    
-                    const loop = () => {
-                        if(!isGridMode || v.paused) return;
-                        if(v.currentTime >= s + 3) v.currentTime = s;
-                        ctx.drawImage(v, 0, 0, canvas.width, canvas.height);
-                        requestAnimationFrame(loop);
-                    };
-                    v.play().then(() => loop()).catch(()=>{});
-                };
-            }
+        function timeToSec(str) {
+            const p = str.split(':').reverse();
+            let s = 0;
+            if(p[0]) s += parseFloat(p[0]);
+            if(p[1]) s += parseInt(p[1]) * 60;
+            if(p[2]) s += parseInt(p[2]) * 3600;
+            return s || 0;
         }
-
-        function openStudio(s, e) {
-            const dur = studioVideo.duration || 0;
-            config.start = Math.max(0, s);
-            config.end = Math.min(dur, e);
-            switchPage('studio');
-            studioVideo.currentTime = config.start;
-            studioVideo.play();
-            updateTimelineUI();
-        }
-
-        document.getElementById('manual-btn').onclick = () => {
-            openStudio(0, Math.min(4, studioVideo.duration || 0));
-        };
-
-        function initTimeline() {
-            const box = document.getElementById('timeline-box');
-            const hs = document.getElementById('h-start');
-            const he = document.getElementById('h-end');
-            
-            const handleDrag = (e, type) => {
-                const dur = studioVideo.duration;
-                if(!dur || isNaN(dur)) return;
-                const rect = box.getBoundingClientRect();
-                let clientX = e.clientX || (e.touches && e.touches[0].clientX);
-                let x = (clientX - rect.left) / rect.width;
-                x = Math.max(0, Math.min(1, x)) * dur;
-                if(type === 'start') config.start = Math.min(x, config.end - 0.2);
-                else config.end = Math.max(x, config.start + 0.2);
-                updateTimelineUI();
-                studioVideo.currentTime = (type === 'start') ? config.start : config.end;
-            };
-
-            const setupListeners = (el, type) => {
-                const moveHandler = (e) => handleDrag(e, type);
-                const stopHandler = () => {
-                    document.removeEventListener('mousemove', moveHandler);
-                    document.removeEventListener('mouseup', stopHandler);
-                    document.removeEventListener('touchmove', moveHandler);
-                    document.removeEventListener('touchend', stopHandler);
-                };
-                el.addEventListener('mousedown', () => {
-                    document.addEventListener('mousemove', moveHandler);
-                    document.addEventListener('mouseup', stopHandler);
-                });
-                el.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    document.addEventListener('touchmove', moveHandler, {passive:false});
-                    document.addEventListener('touchend', stopHandler);
-                });
-            };
-            setupListeners(hs, 'start');
-            setupListeners(he, 'end');
-        }
-
-        function updateTimelineUI() {
-            const dur = studioVideo.duration || 1;
-            const l = (config.start / dur) * 100;
-            const r = (config.end / dur) * 100;
-            document.getElementById('h-start').style.left = l + "%";
-            document.getElementById('h-end').style.left = r + "%";
-            document.getElementById('timeline-sel').style.left = l + "%";
-            document.getElementById('timeline-sel').style.width = (r - l) + "%";
-            document.getElementById('start-label').innerText = config.start.toFixed(1) + 's';
-            document.getElementById('end-label').innerText = config.end.toFixed(1) + 's';
-            document.getElementById('dur-label').innerText = (config.end - config.start).toFixed(1) + 's';
-        }
-
-        studioVideo.ontimeupdate = () => { 
-            if(studioVideo.currentTime >= config.end) studioVideo.currentTime = config.start; 
-        };
 
         document.querySelectorAll('.control-chip').forEach(chip => {
             chip.onclick = () => {
@@ -358,34 +273,195 @@
                 document.querySelectorAll(`.control-chip[data-type="${type}"]`).forEach(c => c.classList.remove('active'));
                 chip.classList.add('active');
                 config[type] = parseInt(chip.dataset.val);
-            };
+            }
         });
 
+        const startApp = (src) => {
+            showStatus("جاري الاتصال بالسيرفر وجلب الفيديو...");
+            video.crossOrigin = "anonymous";
+            video.src = src;
+            video.load(); 
+
+            video.onloadedmetadata = () => {
+                showStatus("تم التحميل بنجاح.");
+                document.getElementById('manual-btn').classList.remove('hidden');
+                config.end = Math.min(3, video.duration);
+                switchPage('grid');
+                document.getElementById('gif-grid').innerHTML = '';
+                generateGrid(6);
+                initTimeline();
+                updateUI();
+                setTimeout(() => statusBar.style.display = 'none', 2000);
+            };
+
+            video.onerror = () => {
+                showStatus("فشل التحميل: الرابط محمي (CORS) أو غير مدعوم مباشرة.", "error");
+            };
+        }
+
+        document.getElementById('video-input').onchange = (e) => {
+            if(e.target.files[0]) startApp(URL.createObjectURL(e.target.files[0]));
+        }
+        document.getElementById('url-btn').onclick = () => {
+            const url = document.getElementById('video-url').value.trim();
+            if(url) startApp(url);
+        }
+
+        function generateGrid(n) {
+            const grid = document.getElementById('gif-grid');
+            const dur = video.duration;
+            for(let i=0; i<n; i++) {
+                const s = Math.random() * Math.max(0, dur - 3);
+                const card = document.createElement('div');
+                card.className = 'aspect-video rounded-3xl bg-neutral-900 overflow-hidden relative cursor-pointer border-2 border-transparent hover:border-purple-600 transition-all';
+                card.onclick = () => {
+                    config.start = s;
+                    config.end = s + 3;
+                    switchPage('studio');
+                    video.currentTime = s;
+                    video.play();
+                    updateUI();
+                };
+                grid.appendChild(card);
+                
+                const v = document.createElement('video');
+                v.crossOrigin = "anonymous";
+                v.src = video.src; v.muted = true; v.currentTime = s; v.className = 'w-full h-full object-cover';
+                v.playsInline = true;
+                card.appendChild(v);
+                v.onloadeddata = () => {
+                    v.play().catch(()=>{});
+                    setInterval(() => { if(isGridMode && v.currentTime >= s+3) v.currentTime = s; }, 500);
+                }
+            }
+        }
+
+        function initTimeline() {
+            const box = document.getElementById('timeline-box');
+            const hStart = document.getElementById('h-start');
+            const hEnd = document.getElementById('h-end');
+
+            const move = (e, type) => {
+                const rect = box.getBoundingClientRect();
+                const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+                const x = clientX - rect.left;
+                let pct = Math.max(0, Math.min(1, x / rect.width));
+                let time = pct * video.duration;
+
+                if(type === 'start') {
+                    config.start = Math.min(time, config.end - 0.1);
+                } else {
+                    config.end = Math.max(time, config.start + 0.1);
+                }
+                
+                video.currentTime = (type === 'start' ? config.start : config.end);
+                updateUI();
+            };
+
+            const attach = (el, type) => {
+                const startDrag = (e) => {
+                    const onMove = (ev) => move(ev, type);
+                    const onEnd = () => {
+                        window.removeEventListener('mousemove', onMove);
+                        window.removeEventListener('mouseup', onEnd);
+                        window.removeEventListener('touchmove', onMove);
+                        window.removeEventListener('touchend', onEnd);
+                        video.play();
+                    };
+                    video.pause();
+                    window.addEventListener('mousemove', onMove);
+                    window.addEventListener('mouseup', onEnd);
+                    window.addEventListener('touchmove', onMove, {passive: false});
+                    window.addEventListener('touchend', onEnd);
+                };
+                el.addEventListener('mousedown', startDrag);
+                el.addEventListener('touchstart', startDrag, {passive: false});
+            }
+
+            attach(hStart, 'start');
+            attach(hEnd, 'end');
+        }
+
+        function updateUI() {
+            const dur = video.duration || 1;
+            const sPct = (config.start / dur) * 100;
+            const ePct = (config.end / dur) * 100;
+
+            document.getElementById('h-start').style.left = `calc(${sPct}% - 15px)`;
+            document.getElementById('h-end').style.left = `calc(${ePct}% - 15px)`;
+            
+            const sel = document.getElementById('timeline-sel');
+            sel.style.left = sPct + "%";
+            sel.style.width = (ePct - sPct) + "%";
+
+            startInput.value = formatTime(config.start);
+            endInput.value = formatTime(config.end);
+            document.getElementById('dur-label').innerText = Math.abs(config.end - config.start).toFixed(2) + 's';
+        }
+
+        [startInput, endInput].forEach(input => {
+            input.onchange = () => {
+                const s = timeToSec(startInput.value);
+                const e = timeToSec(endInput.value);
+                if(s < e && e <= video.duration) {
+                    config.start = s;
+                    config.end = e;
+                    video.currentTime = s;
+                    updateUI();
+                }
+            }
+        });
+
+        video.ontimeupdate = () => {
+            if(video.currentTime >= config.end || video.currentTime < config.start) {
+                video.currentTime = config.start;
+            }
+        }
+
         document.getElementById('render-btn').onclick = async () => {
-            document.getElementById('render-overlay').classList.remove('hidden');
+            const overlay = document.getElementById('render-overlay');
+            overlay.classList.remove('hidden');
+            
             const {start, end, size, fps} = config;
             const step = 1 / fps;
-            const gif = new GIF({ workers: 4, quality: 10, width: size, height: size / (studioVideo.videoWidth/studioVideo.videoHeight), workerScript: workerBlobUrl });
-            const tempC = document.createElement('canvas');
-            tempC.width = size; tempC.height = size / (studioVideo.videoWidth/studioVideo.videoHeight);
-            const tctx = tempC.getContext('2d');
+            const height = size / (video.videoWidth/video.videoHeight);
+            
+            const gif = new GIF({ workers: 4, quality: 10, width: size, height, workerScript: workerBlobUrl });
+            const canvas = document.createElement('canvas');
+            canvas.width = size; canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            
             let cur = start;
+            const total = Math.ceil((end - start) / step);
+            let frames = 0;
+
             while(cur <= end) {
-                hiddenSource.currentTime = cur;
-                await new Promise(r => hiddenSource.onseeked = r);
-                tctx.drawImage(hiddenSource, 0, 0, size, tempC.height);
-                gif.addFrame(tctx, {copy: true, delay: step * 1000});
+                video.currentTime = cur;
+                await new Promise(r => {
+                    const sk = () => { video.removeEventListener('seeked', sk); r(); };
+                    video.addEventListener('seeked', sk);
+                });
+                ctx.drawImage(video, 0, 0, size, height);
+                gif.addFrame(ctx, {copy: true, delay: step * 1000});
                 cur += step;
-                document.getElementById('render-pct').innerText = `FRAME: ${Math.round(cur*fps)}`;
+                frames++;
+                document.getElementById('render-pct').innerText = `${Math.round((frames/total)*100)}%`;
             }
-            gif.on('finished', blob => {
-                const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `infinity.gif`; a.click();
-                document.getElementById('render-overlay').classList.add('hidden');
+
+            gif.on('finished', b => {
+                const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `infinity_${Date.now()}.gif`; a.click();
+                overlay.classList.add('hidden');
             });
             gif.render();
-        };
+        }
 
-        const obs = new IntersectionObserver(e => { if(e[0].isIntersecting && isGridMode && studioVideo.duration > 0) generateGrid(2); });
+        document.getElementById('manual-btn').onclick = () => {
+             config.start = 0; config.end = video.duration;
+             switchPage('studio');
+             updateUI();
+        }
+
+        const obs = new IntersectionObserver(e => { if(e[0].isIntersecting && isGridMode && video.duration) generateGrid(4); });
         obs.observe(document.getElementById('load-more'));
     </script>
 </body>
